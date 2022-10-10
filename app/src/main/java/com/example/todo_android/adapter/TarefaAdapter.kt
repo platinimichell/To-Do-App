@@ -3,10 +3,15 @@ package com.example.todo_android.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.example.todo_android.MainViewModel
 import com.example.todo_android.databinding.CardLayoutBinding
 import com.example.todo_android.model.Tarefa
+import java.text.SimpleDateFormat
 
-class TarefaAdapter : RecyclerView.Adapter<TarefaAdapter.TarefaViewHolder>(){
+class TarefaAdapter (
+    val taskClickListener: TaskClickListener,
+    val mainViewModel: MainViewModel,
+        ) : RecyclerView.Adapter<TarefaAdapter.TarefaViewHolder>(){
 
     private var listTarefa = emptyList<Tarefa>()
 
@@ -24,9 +29,21 @@ class TarefaAdapter : RecyclerView.Adapter<TarefaAdapter.TarefaViewHolder>(){
         holder.biding.textNome.text = tarefa.nome
         holder.biding.textDescricao.text = tarefa.descricao
         holder.biding.textResponsavel.text = tarefa.responsavel
-        holder.biding.textData.text = tarefa.data
+        val formatter = SimpleDateFormat("yyyy-mm-dd")
+        val date = formatter.parse(tarefa.data)
+        holder.biding.textData.text = formatter.format(date!!)
         holder.biding.switchAtivo.isChecked = tarefa.status
         holder.biding.textCategoria.text = tarefa.categoria.descricao
+
+        holder.itemView.setOnClickListener{
+            taskClickListener.onTaskClickListener(tarefa)
+        }
+
+        holder.biding.switchAtivo.setOnCheckedChangeListener { compoundButton, ativo ->
+            tarefa.status = ativo
+            mainViewModel.updateTarefa(tarefa)
+        }
+
     }
 
     override fun getItemCount(): Int {
@@ -34,7 +51,7 @@ class TarefaAdapter : RecyclerView.Adapter<TarefaAdapter.TarefaViewHolder>(){
     }
 
     fun setList(list: List<Tarefa>){
-        listTarefa = list
+        listTarefa = list.sortedByDescending { it.id }
         notifyDataSetChanged()
 
     }
