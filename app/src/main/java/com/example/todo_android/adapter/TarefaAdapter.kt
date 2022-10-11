@@ -1,5 +1,7 @@
 package com.example.todo_android.adapter
 
+import android.app.AlertDialog
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -11,6 +13,7 @@ import java.text.SimpleDateFormat
 class TarefaAdapter (
     val taskClickListener: TaskClickListener,
     val mainViewModel: MainViewModel,
+    val context: Context
         ) : RecyclerView.Adapter<TarefaAdapter.TarefaViewHolder>(){
 
     private var listTarefa = emptyList<Tarefa>()
@@ -44,6 +47,10 @@ class TarefaAdapter (
             mainViewModel.updateTarefa(tarefa)
         }
 
+        holder.biding.buttonDeletar.setOnClickListener{
+            showAlertDialog(tarefa.id)
+        }
+
     }
 
     override fun getItemCount(): Int {
@@ -53,7 +60,18 @@ class TarefaAdapter (
     fun setList(list: List<Tarefa>){
         listTarefa = list.sortedByDescending { it.id }
         notifyDataSetChanged()
+    }
 
+    private fun showAlertDialog(id: Long){
+        AlertDialog.Builder(context)
+            .setTitle("Excluir Tarefa")
+            .setMessage("Deseja excluir a tarefa?")
+            .setPositiveButton("Sim"){
+                _,_ -> mainViewModel.deleteTarefa(id)
+            }
+            .setNegativeButton("Não"){
+                _,_ ->
+            }.show()
     }
 
 }
